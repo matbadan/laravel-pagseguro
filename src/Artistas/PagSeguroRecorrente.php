@@ -32,13 +32,30 @@ class PagSeguroRecorrente extends PagSeguroClient
         ];
 
         $this->preApproval = $preApproval;
-        Log::info($this->preApproval);
-        return $this->sendPreApproval($this->preApproval);
+        return $this->sendTransactionPreApproval($this->preApproval);
     }
 
+    protected function sendTransactionPreApproval(array $parameters)
+    {
+        
 
+        $parameters = $this->formatParameters($parameters);
 
-    function sendPreApproval($params){
+        return $this->executeCurl($parameters);
+    }
+
+    private function formatParameters($parameters)
+    {
+        $data = '';
+
+        foreach ($parameters as $key => $value) {
+            $data .= $key.'='.$value.'&';
+        }
+
+        return rtrim($data, '&');
+    }
+
+    function executeCurl($params){
 
         $sandbox = $this->sandbox ? 'sandbox.' : '';
 
@@ -63,6 +80,8 @@ class PagSeguroRecorrente extends PagSeguroClient
         return $result;
 
     }
+
+
 
 
 
