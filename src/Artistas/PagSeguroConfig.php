@@ -87,7 +87,7 @@ class PagSeguroConfig
         $sandbox = $this->sandbox ? 'sandbox.' : '';
 
         $url = [
-            'request'       => 'https://ws.'.$sandbox.'pagseguro.uol.com.br/pre-approvals/request',
+            //'request'       => 'https://ws.'.$sandbox.'pagseguro.uol.com.br/pre-approvals',
             'session'       => 'https://ws.'.$sandbox.'pagseguro.uol.com.br/v2/sessions',
             'transactions'  => 'https://ws.'.$sandbox.'pagseguro.uol.com.br/v2/transactions',
             'notifications' => 'https://ws.'.$sandbox.'pagseguro.uol.com.br/v3/transactions/notifications/',

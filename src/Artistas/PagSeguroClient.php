@@ -58,24 +58,20 @@ class PagSeguroClient extends PagSeguroConfig
      * @return \SimpleXMLElement
      */
     private function executeCurl($parameters, $url)
-    {
+    {        
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=ISO-8859-1']);
-
         if ($parameters !== null) {
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $parameters);
         }
-
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_ENCODING, 'ISO-8859-1');
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, !$this->sandbox);
-
         $result = curl_exec($curl);
         $result = $this->formatResult($result, $curl);
         curl_close($curl);
-
         return $result;
     }
 
@@ -110,6 +106,8 @@ class PagSeguroClient extends PagSeguroConfig
             throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
         }
 
+        //dd($result);
+
         $result = simplexml_load_string($result);
 
         if (isset($result->error) && isset($result->error->message)) {
@@ -128,8 +126,8 @@ class PagSeguroClient extends PagSeguroConfig
     public function startSession()
     {
         return (string) $this->sendTransaction([
-          'email' => $this->email,
-          'token' => $this->token,
+            'email' => $this->email,
+            'token' => $this->token,
         ], $this->url['session'])->id;
     }
 
