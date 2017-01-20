@@ -35,8 +35,6 @@ class PagSeguroClient extends PagSeguroConfig
             $parameters = null;
         }
 
-        Log::info('request');
-
         return $this->executeCurl($parameters, $url, ['Content-Type: application/x-www-form-urlencoded; charset=ISO-8859-1']);
     }
 
@@ -107,9 +105,9 @@ class PagSeguroClient extends PagSeguroConfig
 
     private function executeCurlJson($parameters, $url, array $headers)
     {
-        
+
         Log::info($url);
-        
+
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -181,6 +179,8 @@ class PagSeguroClient extends PagSeguroConfig
             $this->log->error('Notificação/Transação não encontrada', ['Retorno:' => $result]);
             throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
         }
+
+        Log::info($result);
 
         $result = simplexml_load_string($result);
 

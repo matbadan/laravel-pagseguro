@@ -46,162 +46,70 @@ class PagSeguroRecorrente extends PagSeguroClient
         return $this->sendTransaction($this->preApproval, $this->url['request']);
     }
 
- /*   public function setDirectPreApproval(array $directPreApproval){
 
-        $directPreApproval = [
-            'plan'=>$this->sanitize($directPreApproval, 'plan'),
-            'reference'=>$this->sanitize($directPreApproval, 'reference')
-        ];
-
-        $this->directPreApproval = $directPreApproval;
-
-        return $this;
-
-    }
-
-    public function setDirectPreApprovalSenderInfo(array $directPreApprovalSenderInfo){
-
-        $directPreApprovalSenderInfo = [
-            'name'=>$this->sanitize($directPreApprovalSenderInfo, 'name'), 
-            'email'=>$this->sanitize($directPreApprovalSenderInfo, 'email'),  
-            'ip'=>$this->sanitize($directPreApprovalSenderInfo, 'ip'),  
-            'hash'=>$this->sanitize($directPreApprovalSenderInfo, 'hash'),  
-        ];
-
-        $this->directPreApprovalSenderInfo = $directPreApprovalSenderInfo;
-
-        return $this;
-
-    }
-
-    public function setDirectPreApprovalSenderPhone(array $directPreApprovalSenderPhone){
-
-        $phone = $this->sanitize($directPreApprovalSenderPhone, 'phone');
-
-        $directApprovalSenderPhone = [
-            'area'=>  substr($phone, 0, 2),
-            'number'=> substr($phone, 2),
-        ];
-
-        $this->directPreApprovalSenderPhone = $directApprovalSenderPhone;
-
-        return $this;
-    }
-
-    public function setDirectPreApprovalSenderAddress(array $directPreApprovalSenderAddress){
-
-
-        $preApprovalSenderAddress = [
-            'number'=>$this->sanitize($directPreApprovalSenderAddress, 'number'),
-            'street'=>$this->sanitize($directPreApprovalSenderAddress, 'street'),
-            'complement'=>$this->sanitize($directPreApprovalSenderAddress, 'complement'),
-            'district'=>$this->sanitize($directPreApprovalSenderAddress, 'district'),
-            'city'=>$this->sanitize($directPreApprovalSenderAddress, 'city'),
-            'state'=>$this->sanitize($directPreApprovalSenderAddress, 'state'),
-            'country'=>$this->sanitize($directPreApprovalSenderAddress, 'country'),
-            'postalCode'=>$this->sanitize($directPreApprovalSenderAddress, 'postalCode'),
-        ];
-
-        $this->directPreApprovalSenderAddress = $preApprovalSenderAddress;
-
-        return $this;
-    }
-
-    public function setDirectPreApprovalCreditCard(array $directPreApprovalCreditCard){
-
-        $directPreApprovalCreditCard = [
-            'creditCardToken'=>$this->sanitize($directPreApprovalCreditCard, 'token'),
-        ];
-        $this->directPreApprovalCreditCard =  $directPreApprovalCreditCard;
-
-        return $this;
-
-    }
-
-    public function setDirectPreApprovalCreditCardHolder(array $directPreApprovalCreditCardHolder){
-
-        $phone = $this->sanitizeNumber($directPreApprovalCreditCardHolder, 'phone');
-
-        $directPreApprovalCreditCardHolder = [
-             dados do titular do cartão 
-            'name'=>$this->sanitize($directPreApprovalCreditCardHolder, 'name'),
-            'birthDate'=>$this->sanitize($directPreApprovalCreditCardHolder, 'birthDate'),
-            'documentType'=>$this->sanitize($directPreApprovalCreditCardHolder, 'documentType'),
-            'documentValue'=>$this->sanitize($directPreApprovalCreditCardHolder, 'documentValue'),
-            'phoneArea'=>substr($phone, 0, 2),
-            'phoneNumber'=>substr($phone, 2),
-        ];
-
-        $this->directPreApprovalCreditCardHolder = $directPreApprovalCreditCardHolder;
-
-        return $this;
-
-    }*/
-
-    public function send(){
-
+    public function sendPreApproval(array $preApproval){
+        
         $array = [
-            'plan' => 'FFAC8AE62424AC5884C90F8DAAE2F21A',
-            'reference' => 'MEU-CODIGO',
+            'plan' => $this->sanitize($preApproval, 'plan'),
+            'reference' => $this->sanitize($preApproval, 'reference'),
             'sender' => [
-            "name" => "José Comprador",
-            "email" => "email@consumidor.com.br",
-            "ip" => "1.1.1.1",
-            "hash" => "hash",
+            "name" =>  $this->sanitize($preApproval, 'senderName'),
+            "email" => $this->sanitize($preApproval, 'senderEmail'),
+            "ip" => $this->sanitize($preApproval, 'senderIp'),
+            "hash" => $this->sanitize($preApproval, 'senderHash'),
             'phone' => [
-            "areaCode" => "99",
-            "number" => "99999999",
+            "areaCode" => $this->sanitize($preApproval, 'phoneArea'),
+            "number" => $this->sanitize($preApproval, 'phoneNumber'),
         ],
             'address' => [
-            "street" => "Av. PagSeguro",
-            "number" => "9999",
-            "complement" => "99o andar",
-            "district" => "Jardim Internet",
-            "city" => "Cidade Exemplo",
-            "state" => "SP",
-            "country" => "BRA",
-            "postalCode" => "99999999",
+            "street" => $this->sanitize($preApproval, 'senderStreet'),
+            "number" => $this->sanitize($preApproval, 'senderNumber'),
+            "complement" => $this->sanitize($preApproval, 'senderComplement'),
+            "district" => $this->sanitize($preApproval, 'senderDistrict'),
+            "city" => $this->sanitize($preApproval, 'senderCity'),
+            "state" => $this->sanitize($preApproval, 'senderState'),
+            "country" => $this->sanitize($preApproval, 'senderCountry'),,
+            "postalCode" => $this->sanitize($preApproval, 'senderPostalCode'),
         ],
             'documents' => [
             [
-            "type" => "CPF",
-            "value" => "99999999999",
+            "type" => $this->sanitize($preApproval, 'senderDocumentType'),
+            "value" => $this->sanitize($preApproval, 'senderDocumentValue'),
         ]
         ]
         ],
             'paymentMethod' => [
-            "type" => "CREDITCARD",
+            "type" => $this->sanitize($preApproval, 'paymentType'),
             'creditCard' => [
-            'token' => '4C63F1BD5A0E47220F8DB2920325499D',
+            'token' => $this->sanitize($preApproval, 'creditCardToken'),
             'holder' => [
-            "name" => "JOSÉ COMPRADOR",
-            "birthDate" => "20/12/1990",                
+            "name" => $this->sanitize($preApproval, 'creditCardHolderName'),
+            "birthDate" => $this->sanitize($preApproval, 'creditCardHolderBirthDate'),          
             'documents' => [
             [
-            "type" => "CPF",
-            "value" => "99999999999",
+            "type" => $this->sanitize($preApproval, 'creditCardHolderDocumentType'),
+            "value" => $this->sanitize($preApproval, 'creditCardHolderDocumentValue'),
         ]
         ],
             'phone' => [
-            "areaCode" => "99",
-            "number" => "99999999",
+            "areaCode" => $this->sanitize($preApproval, 'creditCardHolderPhoneArea'),
+            "number" => $this->sanitize($preApproval, 'creditCardHolderPhoneNumber'),
         ],
             'billingAddress' => [
-            "street" => "Av. PagSeguro",
-            "number" => "9999",
-            "complement" => "99o andar",
-            "district" => "Jardim Internet",
-            "city" => "Cidade Exemplo",
-            "state" => "SP",
-            "country" => "BRA",
-            "postalCode" => "99999999",
+            "street" => $this->sanitize($preApproval, 'billingStreet'),
+            "number" => $this->sanitize($preApproval, 'billingNumber'),
+            "complement" => $this->sanitize($preApproval, 'billingComplement'),
+            "district" => $this->sanitize($preApproval, 'billingDistrict'),
+            "city" => $this->sanitize($preApproval, 'billingCity'),
+            "state" => $this->sanitize($preApproval, 'billingState'),
+            "country" => $this->sanitize($preApproval, 'billingCountry'),
+            "postalCode" => $this->sanitize($preApproval, 'billingPostalCode'),
         ],
         ]
         ]
         ]
         ];
 
-        Log::info('pre-approval');
         return $this->sendJsonTransaction($array, $this->url['pre-approval']);
 
     }
