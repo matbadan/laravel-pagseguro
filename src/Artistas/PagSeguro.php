@@ -180,6 +180,26 @@ class PagSeguro extends PagSeguroClient
      *
      * @return $this
      */
+    
+    public function setSenderAddress(array $senderAddress)
+    {
+        $shippingAddress = [
+          'senderAddressStreet'     => $this->sanitize($senderAddress, 'senderAddressStreet'),
+          'senderAddressNumber'     => $this->sanitize($senderAddress, 'senderAddressNumber'),
+          'senderAddressComplement' => $this->sanitize($senderAddress, 'senderAddressComplement'),
+          'senderAddressDistrict'   => $this->sanitize($senderAddress, 'senderAddressDistrict'),
+          'senderAddressPostalCode' => $this->sanitizeNumber($senderAddress, 'senderAddressPostalCode'),
+          'senderAddressCity'       => $this->sanitize($senderAddress, 'senderAddressCity'),
+          'senderAddressState'      => strtoupper($this->checkValue($senderAddress, 'senderAddressState')),
+          'senderAddressCountry'    => 'BRA',
+        ];
+
+        $this->validateShippingAddress($shippingAddress);
+        $this->shippingAddress = $shippingAddress;
+
+        return $this;
+    }
+    
     public function setShippingAddress(array $shippingAddress)
     {
         $shippingAddress = [

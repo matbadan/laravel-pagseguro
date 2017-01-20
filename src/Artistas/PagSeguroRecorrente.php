@@ -16,9 +16,11 @@ class PagSeguroRecorrente extends PagSeguroClient
      * @return $this
      */
 
-    public function setPreApproval(array $preApproval){
+    public function setPreApprovalRequest(array $preApproval){
 
         $preApproval = [
+            'email' => $this->email,
+            'token' => $this->token,
             'preApprovalName'     => $this->sanitize($preApproval, 'preApprovalName'),
             'preApprovalCharge' => $this->sanitize($preApproval, 'preApprovalCharge'),
             'preApprovalPeriod'    => $this->sanitize($preApproval, 'preApprovalPeriod'),
@@ -32,58 +34,92 @@ class PagSeguroRecorrente extends PagSeguroClient
         ];
 
         $this->preApproval = $preApproval;
-        return $this->sendTransactionPreApproval($this->preApproval);
+
+        return $this->sendTransaction($this->preApproval, $this->url['request']);
     }
 
-    protected function sendTransactionPreApproval(array $parameters)
-    {
+    public function setDirectPreApproval(array $directPreApproval){
+
+        $directPreApproval = [
+            'directApprovalPlan'=>$this->sanitize($directPreApproval, 'directApprovalPlan'),
+            'directApprovalReference'=>$this->sanitize($directPreApproval, 'directApprovalReference')
+        ];
+
+        $this->directPreApproval = $directPreApproval;
+
+        return $this;
+
+    }
+
+    public function setDirectPreApprovalSenderInfo(array $directPreApprovalSenderInfo){
+
+        $directPreApprovalSenderInfo = [
+            'preApprovalSenderInfoName'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoName'), 
+            'preApprovalSenderInfoEmail'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoEmail'),  
+            'preApprovalSenderInfoIp'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoIp'),  
+            'preApprovalSenderInfoHash'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoHash'),  
+            'preApprovalSenderInfoDocumentType'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoDocumentType'),  
+            'preApprovalSenderInfoDocumentValue'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoDocumentValue'),  
+            'preApprovalSenderInfoPhoneArea'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoPhoneArea'), 
+            'preApprovalSenderInfoPhoneNumber'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoPhoneNumber'),
+
+        ];
+
+        $this->directPreApprovalSenderInfo = $directPreApprovalSenderInfo;
+
+        return $this;
+
+    }
+
+    public function setDirectPreApprovalSenderAddress(array $preApprovalSenderAddress){
+
+
+        $preApprovalSenderAddress = [
+            'preApprovalSenderAddressNumber'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressNumber'),
+            'preApprovalSenderAddressStreet'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressStreet'),
+            'preApprovalSenderAddressComplement'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressComplement'),
+            'preApprovalSenderAddressDistrict'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressDistrict'),
+            'preApprovalSenderAddressCity'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalAddressCity'),
+            'preApprovalSenderAddressState'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalAddressState'),
+            'preApprovalSenderAddressCountry'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressCountry'),
+            'preApprovalSenderAddressPostalCode'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressPostalCode'),
+        ];
+
+        $this->directPreApprovalSenderAddress = $preApprovalSenderAddress;
+
+        return $this;
+    }
+
+    public function setDirectPreApprovalCreditCard(array $directPreApprovalCreditCard){
+
+        $directPreApprovalCreditCard = [
+            'token'=>$this->sanitize($directPreApprovalCreditCard, 'token'),
+        ];
+        $this->directPreApprovalCreditCard =  $directPreApprovalCreditCard;
+
+        return $this;
+
+    }
+
+    public function setDirectPreApprovalCreditCardHolder(array $directPreApprovalCreditCardHolder){
         
+        $phone = $this->sanitizeNumber($directPreApprovalCreditCardHolder, 'phone');
+        
+        $directPreApprovalCreditCardHolder = [
+            /* dados do titular do cartão */
+            'name'=>$this->sanitize($directPreApprovalCreditCardHolder, 'name'),
+            'birthDate'=>$this->sanitize($directPreApprovalCreditCardHolder, 'birthDate'),
+            'documentType'=>$this->sanitize($directPreApprovalCreditCardHolder, 'documentType'),
+            'documentValue'=>$this->sanitize($directPreApprovalCreditCardHolder, 'documentValue'),
+            'phoneArea'=>substr($phone, 0, 2),
+            'phoneNumber'=>substr($phone, 2),
+        ];
 
-        $parameters = $this->formatParameters($parameters);
+        $this->preApprovaldirectPreApprovalCreditCardHolder = $directPreApprovalCreditCardHolder;
 
-        return $this->executeCurl($parameters);
-    }
-
-    private function formatParameters($parameters)
-    {
-        $data = '';
-
-        foreach ($parameters as $key => $value) {
-            $data .= $key.'='.$value.'&';
-        }
-
-        return rtrim($data, '&');
-    }
-
-    function executeCurl($params){
-
-        $sandbox = $this->sandbox ? 'sandbox.' : '';
-
-        //$url = 'https://ws.'.$sandbox.'pagseguro.uol.com.br/pre-approvals/request?email='.$this->email.'&token='.$this->token;
-
-        $url = 'https://ws.sandbox.pagseguro.uol.com.br/v2/pre-approvals/request?email='.$this->email.'&token='.$this->token;
-
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, ['application/vnd.pagseguro.com.br.v3+xml;charset=ISO-8859-1']);
-        if ($params !== null) {
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
-        }
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_ENCODING, 'utf-8');
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, !$this->sandbox);
-        $result = curl_exec($curl);
-        curl_close($curl);
-
-        return $result;
+        return $this;
 
     }
-
-
-
-
 
 
 }
