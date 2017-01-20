@@ -2,67 +2,117 @@
 
 namespace Artistas\PagSeguro;
 
+use Log;
+
 class PagSeguroClient extends PagSeguroConfig
 {
     /**
-     * Envia a transação.
+     * Envia a transação HTML.
      *
      * @param array  $parameters
      * @param string $url        Padrão $this->url['transactions']
      * @param bool   $post
+     * @param array  $headers
      *
      * @throws \Artistas\PagSeguro\PagSeguroException
      *
      * @return \SimpleXMLElement
      */
-    protected function sendTransaction(array $parameters, $url = null, $post = true)
+    protected function sendTransaction(array $parameters, $url = null, $post = true, array $headers = null)
     {
         if ($url === null) {
             $url = $this->url['transactions'];
         }
 
-        $parameters = $this->formatParameters($parameters);
+        $data = '';
+        foreach ($parameters as $key => $value) {
+            $data .= $key.'='.$value.'&';
+        }
+        $parameters = rtrim($data, '&');
 
         if (!$post) {
             $url .= '?'.$parameters;
             $parameters = null;
         }
 
-        return $this->executeCurl($parameters, $url);
+        Log::info('request');
+
+        return $this->executeCurl($parameters, $url, ['Content-Type: application/x-www-form-urlencoded; charset=ISO-8859-1']);
     }
 
     /**
-     * Formata os parametros.
+     * Envia a transação XML.
      *
-     * @param array $parameters
+     * @param array  $parameters
+     * @param string $url        Padrão $this->url['transactions']
+     * @param string $method
+     * @param array  $headers
      *
-     * @return string
+     * @throws \Artistas\PagSeguro\PagSeguroException
+     *
+     * @return \SimpleXMLElement
      */
-    private function formatParameters($parameters)
+    protected function sendXmlTransaction(array $parameters, $url = null, $method = 'POST', array $headers = null)
     {
-        $data = '';
-
-        foreach ($parameters as $key => $value) {
-            $data .= $key.'='.$value.'&';
+        if ($url === null) {
+            $url = $this->url['transactions'];
         }
 
-        return rtrim($data, '&');
+        $xml = new \SimpleXMLElement('<root/>');
+        array_walk_recursive($parameters, function ($value, $key) use ($xml) {
+            $xml->addChild($key, utf8_encode($value));
+        });
+        $parameters = $xml->asXml();
+
+        return $this->executeCurl($parameters, $url, ['Content-Type: application/xml; charset=UTF-8']);
+    }
+
+    /**
+     * Envia a transação JSON.
+     *
+     * @param array  $parameters
+     * @param string $url        Padrão $this->url['transactions']
+     * @param string $method
+     * @param array  $headers
+     *
+     * @throws \Artistas\PagSeguro\PagSeguroException
+     *
+     * @return \SimpleXMLElement
+     */
+    protected function sendJsonTransaction(array $parameters, $url = null, $method = 'POST', array $headers = null)
+    {
+        if ($url === null) {
+            $url = $this->url['transactions'];
+        }
+        $url .= '?email='.$this->email.'&token='.$this->token;
+
+        array_walk_recursive($parameters, function (&$value, $key) {
+            $value = utf8_encode($value);
+        });
+        $parameters = json_encode($parameters);
+
+        return $this->executeCurlJson($parameters, $url, ['Accept: application/vnd.pagseguro.com.br.v3+json;charset=ISO-8859-1','Content-Type: application/json; charset=UTF-8']);
     }
 
     /**
      * Executa o Curl.
      *
-     * @param array  $parameters
-     * @param string $url
+     * @param array|string $parameters
+     * @param string       $url
+     * @param array        $headers
      *
      * @return \SimpleXMLElement
      */
-    private function executeCurl($parameters, $url)
-    {      
 
-        $curl = curl_init();        
+
+    private function executeCurlJson($parameters, $url, array $headers)
+    {
+        
+        Log::info($url);
+        
+        $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=ISO-8859-1']);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
         if ($parameters !== null) {
             curl_setopt($curl, CURLOPT_POST, true);
@@ -70,7 +120,28 @@ class PagSeguroClient extends PagSeguroConfig
         }
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_ENCODING, 'ISO-8859-1');
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, !$this->sandbox);
+
+        $result = curl_exec($curl);
+        $result = $this->formatResultJson($result, $curl);
+        curl_close($curl);
+
+        return $result;
+    }
+
+
+    private function executeCurl($parameters, $url, array $headers)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+        if ($parameters !== null) {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $parameters);
+        }
+
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, !$this->sandbox);
 
         $result = curl_exec($curl);
@@ -111,7 +182,6 @@ class PagSeguroClient extends PagSeguroConfig
             throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
         }
 
-
         $result = simplexml_load_string($result);
 
         if (isset($result->error) && isset($result->error->message)) {
@@ -121,6 +191,40 @@ class PagSeguroClient extends PagSeguroConfig
 
         return $result;
     }
+
+    private function formatResultJson($result, $curl)
+    {
+        $getInfo = curl_getinfo($curl);
+
+        if (isset($getInfo['http_code']) && $getInfo['http_code'] == '503') {
+            $this->log->error('Serviço em manutenção.', ['Retorno:' => $result]);
+            throw new PagSeguroException('Serviço em manutenção.', 1000);
+        }
+        if ($result === false) {
+            $this->log->error('Erro ao enviar a transação', ['Retorno:' => $result]);
+            throw new PagSeguroException(curl_error($curl), curl_errno($curl));
+        }
+        if ($result === 'Unauthorized' || $result === 'Forbidden') {
+            $this->log->error('Erro ao enviar a transação', ['Retorno:' => $result]);
+            throw new PagSeguroException($result.': Não foi possível estabelecer uma conexão com o PagSeguro.', 1001);
+        }
+        if ($result === 'Not Found') {
+            $this->log->error('Notificação/Transação não encontrada', ['Retorno:' => $result]);
+            throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
+        }
+
+        $result = $result;
+
+        /*$result = simplexml_load_string($result);
+
+        if (isset($result->error) && isset($result->error->message)) {
+            $this->log->error($result->error->message, ['Retorno:' => $result]);
+            throw new PagSeguroException($result->error->message, (int) $result->error->code);
+        }*/
+
+        return $result;
+    }
+
 
     /**
      * Inicia a Session do PagSeguro.

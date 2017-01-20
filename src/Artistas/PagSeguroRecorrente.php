@@ -3,10 +3,18 @@
 
 namespace Artistas\PagSeguro;
 
+use Log;
+
 class PagSeguroRecorrente extends PagSeguroClient
 {
 
     private $preApproval = [];
+    private $directPreApproval = [];
+    private $directPreApprovalSenderInfo = [];
+    private $directPreApprovalSenderPhone = [];
+    private $directPreApprovalSenderAddress = [];
+    private $directPreApprovalCreditCard = [];
+    private $directPreApprovalCreditCardHolder = [];
 
     /**
      * Define os dados do plano.
@@ -38,11 +46,11 @@ class PagSeguroRecorrente extends PagSeguroClient
         return $this->sendTransaction($this->preApproval, $this->url['request']);
     }
 
-    public function setDirectPreApproval(array $directPreApproval){
+ /*   public function setDirectPreApproval(array $directPreApproval){
 
         $directPreApproval = [
-            'directApprovalPlan'=>$this->sanitize($directPreApproval, 'directApprovalPlan'),
-            'directApprovalReference'=>$this->sanitize($directPreApproval, 'directApprovalReference')
+            'plan'=>$this->sanitize($directPreApproval, 'plan'),
+            'reference'=>$this->sanitize($directPreApproval, 'reference')
         ];
 
         $this->directPreApproval = $directPreApproval;
@@ -54,15 +62,10 @@ class PagSeguroRecorrente extends PagSeguroClient
     public function setDirectPreApprovalSenderInfo(array $directPreApprovalSenderInfo){
 
         $directPreApprovalSenderInfo = [
-            'preApprovalSenderInfoName'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoName'), 
-            'preApprovalSenderInfoEmail'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoEmail'),  
-            'preApprovalSenderInfoIp'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoIp'),  
-            'preApprovalSenderInfoHash'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoHash'),  
-            'preApprovalSenderInfoDocumentType'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoDocumentType'),  
-            'preApprovalSenderInfoDocumentValue'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoDocumentValue'),  
-            'preApprovalSenderInfoPhoneArea'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoPhoneArea'), 
-            'preApprovalSenderInfoPhoneNumber'=>$this->sanitize($directPreApprovalSenderInfo, 'preApprovalSenderInfoPhoneNumber'),
-
+            'name'=>$this->sanitize($directPreApprovalSenderInfo, 'name'), 
+            'email'=>$this->sanitize($directPreApprovalSenderInfo, 'email'),  
+            'ip'=>$this->sanitize($directPreApprovalSenderInfo, 'ip'),  
+            'hash'=>$this->sanitize($directPreApprovalSenderInfo, 'hash'),  
         ];
 
         $this->directPreApprovalSenderInfo = $directPreApprovalSenderInfo;
@@ -71,18 +74,32 @@ class PagSeguroRecorrente extends PagSeguroClient
 
     }
 
-    public function setDirectPreApprovalSenderAddress(array $preApprovalSenderAddress){
+    public function setDirectPreApprovalSenderPhone(array $directPreApprovalSenderPhone){
+
+        $phone = $this->sanitize($directPreApprovalSenderPhone, 'phone');
+
+        $directApprovalSenderPhone = [
+            'area'=>  substr($phone, 0, 2),
+            'number'=> substr($phone, 2),
+        ];
+
+        $this->directPreApprovalSenderPhone = $directApprovalSenderPhone;
+
+        return $this;
+    }
+
+    public function setDirectPreApprovalSenderAddress(array $directPreApprovalSenderAddress){
 
 
         $preApprovalSenderAddress = [
-            'preApprovalSenderAddressNumber'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressNumber'),
-            'preApprovalSenderAddressStreet'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressStreet'),
-            'preApprovalSenderAddressComplement'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressComplement'),
-            'preApprovalSenderAddressDistrict'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressDistrict'),
-            'preApprovalSenderAddressCity'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalAddressCity'),
-            'preApprovalSenderAddressState'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalAddressState'),
-            'preApprovalSenderAddressCountry'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressCountry'),
-            'preApprovalSenderAddressPostalCode'=>$this->sanitize($preApprovalSenderAddress, 'preApprovalSenderAddressPostalCode'),
+            'number'=>$this->sanitize($directPreApprovalSenderAddress, 'number'),
+            'street'=>$this->sanitize($directPreApprovalSenderAddress, 'street'),
+            'complement'=>$this->sanitize($directPreApprovalSenderAddress, 'complement'),
+            'district'=>$this->sanitize($directPreApprovalSenderAddress, 'district'),
+            'city'=>$this->sanitize($directPreApprovalSenderAddress, 'city'),
+            'state'=>$this->sanitize($directPreApprovalSenderAddress, 'state'),
+            'country'=>$this->sanitize($directPreApprovalSenderAddress, 'country'),
+            'postalCode'=>$this->sanitize($directPreApprovalSenderAddress, 'postalCode'),
         ];
 
         $this->directPreApprovalSenderAddress = $preApprovalSenderAddress;
@@ -93,7 +110,7 @@ class PagSeguroRecorrente extends PagSeguroClient
     public function setDirectPreApprovalCreditCard(array $directPreApprovalCreditCard){
 
         $directPreApprovalCreditCard = [
-            'token'=>$this->sanitize($directPreApprovalCreditCard, 'token'),
+            'creditCardToken'=>$this->sanitize($directPreApprovalCreditCard, 'token'),
         ];
         $this->directPreApprovalCreditCard =  $directPreApprovalCreditCard;
 
@@ -102,11 +119,11 @@ class PagSeguroRecorrente extends PagSeguroClient
     }
 
     public function setDirectPreApprovalCreditCardHolder(array $directPreApprovalCreditCardHolder){
-        
+
         $phone = $this->sanitizeNumber($directPreApprovalCreditCardHolder, 'phone');
-        
+
         $directPreApprovalCreditCardHolder = [
-            /* dados do titular do cartão */
+             dados do titular do cartão 
             'name'=>$this->sanitize($directPreApprovalCreditCardHolder, 'name'),
             'birthDate'=>$this->sanitize($directPreApprovalCreditCardHolder, 'birthDate'),
             'documentType'=>$this->sanitize($directPreApprovalCreditCardHolder, 'documentType'),
@@ -115,9 +132,77 @@ class PagSeguroRecorrente extends PagSeguroClient
             'phoneNumber'=>substr($phone, 2),
         ];
 
-        $this->preApprovaldirectPreApprovalCreditCardHolder = $directPreApprovalCreditCardHolder;
+        $this->directPreApprovalCreditCardHolder = $directPreApprovalCreditCardHolder;
 
         return $this;
+
+    }*/
+
+    public function send(){
+
+        $array = [
+            'plan' => 'FFAC8AE62424AC5884C90F8DAAE2F21A',
+            'reference' => 'MEU-CODIGO',
+            'sender' => [
+            "name" => "José Comprador",
+            "email" => "email@consumidor.com.br",
+            "ip" => "1.1.1.1",
+            "hash" => "hash",
+            'phone' => [
+            "areaCode" => "99",
+            "number" => "99999999",
+        ],
+            'address' => [
+            "street" => "Av. PagSeguro",
+            "number" => "9999",
+            "complement" => "99o andar",
+            "district" => "Jardim Internet",
+            "city" => "Cidade Exemplo",
+            "state" => "SP",
+            "country" => "BRA",
+            "postalCode" => "99999999",
+        ],
+            'documents' => [
+            [
+            "type" => "CPF",
+            "value" => "99999999999",
+        ]
+        ]
+        ],
+            'paymentMethod' => [
+            "type" => "CREDITCARD",
+            'creditCard' => [
+            'token' => '4C63F1BD5A0E47220F8DB2920325499D',
+            'holder' => [
+            "name" => "JOSÉ COMPRADOR",
+            "birthDate" => "20/12/1990",                
+            'documents' => [
+            [
+            "type" => "CPF",
+            "value" => "99999999999",
+        ]
+        ],
+            'phone' => [
+            "areaCode" => "99",
+            "number" => "99999999",
+        ],
+            'billingAddress' => [
+            "street" => "Av. PagSeguro",
+            "number" => "9999",
+            "complement" => "99o andar",
+            "district" => "Jardim Internet",
+            "city" => "Cidade Exemplo",
+            "state" => "SP",
+            "country" => "BRA",
+            "postalCode" => "99999999",
+        ],
+        ]
+        ]
+        ]
+        ];
+
+        Log::info('pre-approval');
+        return $this->sendJsonTransaction($array, $this->url['pre-approval']);
 
     }
 
