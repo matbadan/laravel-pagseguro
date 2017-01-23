@@ -101,8 +101,19 @@ class PagSeguroRecorrente extends PagSeguroClient
         ]
         ]
         ];
-        
+
         return $this->sendJsonTransaction($array, $this->url['pre-approval']);
+
+    }
+
+    public function cancelPreApproval($codePreApproval){
+
+        Log::info($codePreApproval);
+        
+        return $this->sendTransaction([
+            'email' => $this->email,
+            'token' => $this->token,
+        ], $this->url['cancelpreapproval'].$codePreApproval, false);
 
     }
 

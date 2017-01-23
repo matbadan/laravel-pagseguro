@@ -2,7 +2,6 @@
 
 namespace Artistas\PagSeguro;
 
-use Log;
 
 class PagSeguro extends PagSeguroClient
 {

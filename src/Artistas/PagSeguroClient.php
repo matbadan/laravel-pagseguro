@@ -2,7 +2,6 @@
 
 namespace Artistas\PagSeguro;
 
-use Log;
 
 class PagSeguroClient extends PagSeguroConfig
 {
@@ -106,7 +105,6 @@ class PagSeguroClient extends PagSeguroConfig
     private function executeCurlJson($parameters, $url, array $headers)
     {
 
-        Log::info($url);
 
         $curl = curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
@@ -162,6 +160,7 @@ class PagSeguroClient extends PagSeguroConfig
     private function formatResult($result, $curl)
     {
         $getInfo = curl_getinfo($curl);
+        
 
         if (isset($getInfo['http_code']) && $getInfo['http_code'] == '503') {
             $this->log->error('Serviço em manutenção.', ['Retorno:' => $result]);
@@ -180,7 +179,6 @@ class PagSeguroClient extends PagSeguroConfig
             throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
         }
 
-        Log::info($result);
 
         $result = simplexml_load_string($result);
 
