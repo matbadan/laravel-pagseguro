@@ -213,7 +213,7 @@ class PagSeguroClient extends PagSeguroConfig
             throw new PagSeguroException($result.': Não foi possível encontrar a notificação/transação no PagSeguro.', 1002);
         }
 
-        $result = $result;
+        $result = json_decode($result);
 
         /*$result = simplexml_load_string($result);
 

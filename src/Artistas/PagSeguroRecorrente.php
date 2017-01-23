@@ -8,14 +8,6 @@ use Log;
 class PagSeguroRecorrente extends PagSeguroClient
 {
 
-    private $preApproval = [];
-    private $directPreApproval = [];
-    private $directPreApprovalSenderInfo = [];
-    private $directPreApprovalSenderPhone = [];
-    private $directPreApprovalSenderAddress = [];
-    private $directPreApprovalCreditCard = [];
-    private $directPreApprovalCreditCardHolder = [];
-
     /**
      * Define os dados do plano.
      *
@@ -47,69 +39,69 @@ class PagSeguroRecorrente extends PagSeguroClient
     }
 
 
-    public function sendPreApproval(array $preApproval){
-        
+    /**
+     * Cria um pagamento recorrente.
+     *
+     * @param $dados
+     *
+     * @return $this
+     */
+
+
+    public function sendPreApproval($dados){
+
         $array = [
-            'plan' => $this->sanitize($preApproval, 'plan'),
-            'reference' => $this->sanitize($preApproval, 'reference'),
-            'sender' => [
-            "name" =>  $this->sanitize($preApproval, 'senderName'),
-            "email" => $this->sanitize($preApproval, 'senderEmail'),
-            "ip" => $this->sanitize($preApproval, 'senderIp'),
-            "hash" => $this->sanitize($preApproval, 'senderHash'),
-            'phone' => [
-            "areaCode" => $this->sanitize($preApproval, 'phoneArea'),
-            "number" => $this->sanitize($preApproval, 'phoneNumber'),
+            'plan'=>$dados['plan'],
+            'reference'=>$dados['reference'],
+            'sender'=>[
+            'name'=>$dados['senderName'],
+            'email'=>$dados['senderEmail'],
+            'ip'=>$dados['senderIp'],
+            'hash'=>$dados['senderHash'],
+            'phone'=>[
+            'areaCode'=>$dados['senderPhoneArea'],
+            'number'=>$dados['senderPhoneNumber'],
         ],
-            'address' => [
-            "street" => $this->sanitize($preApproval, 'senderStreet'),
-            "number" => $this->sanitize($preApproval, 'senderNumber'),
-            "complement" => $this->sanitize($preApproval, 'senderComplement'),
-            "district" => $this->sanitize($preApproval, 'senderDistrict'),
-            "city" => $this->sanitize($preApproval, 'senderCity'),
-            "state" => $this->sanitize($preApproval, 'senderState'),
-            "country" => $this->sanitize($preApproval, 'senderCountry'),,
-            "postalCode" => $this->sanitize($preApproval, 'senderPostalCode'),
+            'address'=>[
+            'street'=>$dados['senderStreet'],
+            'number'=>$dados['senderNumber'],
+            'complement'=>$dados['senderComplement'],
+            'district'=>$dados['senderDistrict'],
+            'city'=>$dados['senderCity'],
+            'state'=>$dados['senderState'],
+            'country'=>$dados['senderCountry'],
+            'postalCode'=>$dados['senderPostalCode'],
         ],
-            'documents' => [
+            'documents'=>[
             [
-            "type" => $this->sanitize($preApproval, 'senderDocumentType'),
-            "value" => $this->sanitize($preApproval, 'senderDocumentValue'),
+            'type'=>$dados['senderDocumentType'],
+            'value'=>$dados['senderDocumentValue'],
+
         ]
         ]
         ],
-            'paymentMethod' => [
-            "type" => $this->sanitize($preApproval, 'paymentType'),
-            'creditCard' => [
-            'token' => $this->sanitize($preApproval, 'creditCardToken'),
-            'holder' => [
-            "name" => $this->sanitize($preApproval, 'creditCardHolderName'),
-            "birthDate" => $this->sanitize($preApproval, 'creditCardHolderBirthDate'),          
-            'documents' => [
+            'paymentMethod'=>[
+            'type'=>$dados['paymentType'],
+            'creditCard'=>[
+            'token'=>$dados['creditCardToken'],
+            'holder'=>[
+            'name'=>$dados['creditCardHolderName'],
+            'birthDate'=>$dados['creditCardHolderBirthDate'],
+            'documents'=>[
             [
-            "type" => $this->sanitize($preApproval, 'creditCardHolderDocumentType'),
-            "value" => $this->sanitize($preApproval, 'creditCardHolderDocumentValue'),
+            'type'=>$dados['creditCardHolderDocumentType'],
+            'value'=>$dados['creditCardHolderDocumentValue'],
         ]
         ],
-            'phone' => [
-            "areaCode" => $this->sanitize($preApproval, 'creditCardHolderPhoneArea'),
-            "number" => $this->sanitize($preApproval, 'creditCardHolderPhoneNumber'),
-        ],
-            'billingAddress' => [
-            "street" => $this->sanitize($preApproval, 'billingStreet'),
-            "number" => $this->sanitize($preApproval, 'billingNumber'),
-            "complement" => $this->sanitize($preApproval, 'billingComplement'),
-            "district" => $this->sanitize($preApproval, 'billingDistrict'),
-            "city" => $this->sanitize($preApproval, 'billingCity'),
-            "state" => $this->sanitize($preApproval, 'billingState'),
-            "country" => $this->sanitize($preApproval, 'billingCountry'),
-            "postalCode" => $this->sanitize($preApproval, 'billingPostalCode'),
+            'phone'=>[
+            'areaCode'=>$dados['creditCardHolderPhoneArea'],
+            'number'=>$dados['creditCardHolderPhoneNumber'],
         ],
         ]
         ]
         ]
         ];
-
+        
         return $this->sendJsonTransaction($array, $this->url['pre-approval']);
 
     }

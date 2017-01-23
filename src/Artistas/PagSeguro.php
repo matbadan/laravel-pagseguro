@@ -2,6 +2,8 @@
 
 namespace Artistas\PagSeguro;
 
+use Log;
+
 class PagSeguro extends PagSeguroClient
 {
     /**
@@ -162,6 +164,7 @@ class PagSeguro extends PagSeguroClient
      */
     private function validateCreditCardHolder(array $creditCardHolder)
     {
+        
         $rules = [
           'creditCardHolderName'         => 'required|max:50',
           'creditCardHolderAreaCode'     => 'required|digits:2',
