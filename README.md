@@ -1,6 +1,11 @@
 # Laravel PagSeguro 
 ### Checkout Transparente
 
+No repositório https://github.com/vanessasoutoc/laravel-pagseguro/
+Atualização com integração para Pagamento Recorrente e Cancelamento do mesmo. 
+Contribuição de @vanessasoutoc
+
+
 [![Developer](https://img.shields.io/badge/Developer-fernandobandeira-red.svg)](https://github.com/fernandobandeira)
 [![Latest Stable Version](https://poser.pugx.org/artistas/laravel-pagseguro/v/stable)](https://packagist.org/packages/artistas/laravel-pagseguro)
 [![Total Downloads](https://poser.pugx.org/artistas/laravel-pagseguro/downloads)](https://packagist.org/packages/artistas/laravel-pagseguro)
